@@ -1,0 +1,666 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Finance Tracker</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles/style.css">
+</head>
+
+<body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <header class="header">
+        <h1>Student Finance Tracker</h1>
+        <button class="header-search-bar" onclick="OpenSearchModal()" title="Search transactions" aria-label="Search transactions">
+            <i class="fas fa-search"></i>
+            <span>Search transactions, budgets...</span>
+        </button>
+    </header>
+
+    <nav class="tab-nav" aria-label="Primary" role="tablist">
+        <button class="tab-btn tab-active" id="tab-btn-transactions" data-tab="transactions" role="tab" aria-selected="true" aria-controls="view-transactions" onclick="switchTab('transactions')">
+            <i class="fas fa-chart-line" aria-hidden="true"></i> Dashboard
+        </button>
+        <button class="tab-btn" id="tab-btn-records" data-tab="records" role="tab" aria-selected="false" aria-controls="view-records" onclick="switchTab('records')">
+            <i class="fas fa-list" aria-hidden="true"></i> Records
+        </button>
+        <button class="tab-btn" id="tab-btn-budgets" data-tab="budgets" role="tab" aria-selected="false" aria-controls="view-budgets" onclick="switchTab('budgets')">
+            <i class="fas fa-wallet" aria-hidden="true"></i> Budgets
+        </button>
+        <button class="tab-btn" id="tab-btn-settings" data-tab="settings" role="tab" aria-selected="false" aria-controls="view-settings" onclick="switchTab('settings')">
+            <i class="fas fa-cog" aria-hidden="true"></i> Settings
+        </button>
+        <button class="tab-btn" id="tab-btn-about" data-tab="about" role="tab" aria-selected="false" aria-controls="view-about" onclick="switchTab('about')">
+            <i class="fas fa-info-circle" aria-hidden="true"></i> About
+        </button>
+    </nav>
+
+    <main id="main-content" tabindex="-1">
+    <!-- Transactions to be shown -->
+    <section class="tab-view" id="view-transactions" role="tabpanel" aria-labelledby="tab-btn-transactions" aria-label="Dashboard">
+        <div class="content">
+            <div class="dashboard-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Monthly Income</h3>
+                        <div class="dropdown-wrapper" id="income-menu-wrapper">
+                            <button class="card-menu" onclick="toggleCardMenu('income')"><i class="fas fa-ellipsis-v"></i></button>
+                            <div class="filter-dropdown card-menu-dropdown" id="income-menu-dropdown" style="display:none;">
+                                <div class="dropdown-item" onclick="toggleCardVisibility('income')">
+                                    <i class="fas fa-eye-slash" id="income-hide-icon"></i> <span id="income-hide-label">Hide Income</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="amount" id="monthly-income">K0.00</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Monthly Expenses</h3>
+                        <div class="dropdown-wrapper" id="expense-menu-wrapper">
+                            <button class="card-menu" onclick="toggleCardMenu('expense')"><i class="fas fa-ellipsis-v"></i></button>
+                            <div class="filter-dropdown card-menu-dropdown" id="expense-menu-dropdown" style="display:none;">
+                                <div class="dropdown-item" onclick="toggleCardVisibility('expense')">
+                                    <i class="fas fa-eye-slash" id="expense-hide-icon"></i> <span id="expense-hide-label">Hide Expenses</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="amount" id="monthly-expenses">K0.00</div>
+                </div>
+            </div>
+
+            <div class="chart-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Overview</h3>
+                        <div style="display: flex; gap: 16px;">
+                            <div class="dropdown-wrapper" id="chart-year-wrapper">
+                                <div class="dropdown" id="chart-year-btn" onclick="toggleChartYearDropdown()" style="cursor:pointer;">
+                                    <span id="chart-year-label">Year</span> <i class="fas fa-chevron-down"></i>
+                                </div>
+                                <div class="filter-dropdown" id="chart-year-dropdown" style="display:none;min-width:110px;"></div>
+                            </div>
+                            <div class="dropdown-wrapper" id="chart-filter-wrapper">
+                                <button class="filter-btn" id="chart-filter-btn" onclick="toggleChartFilterDropdown()">
+                                    <i class="fas fa-filter"></i>
+                                    filter
+                                </button>
+                                <div class="filter-dropdown" id="chart-filter-dropdown" style="display:none;min-width:140px;">
+                                    <div class="dropdown-item" onclick="setChartFilter('both')"><i class="fas fa-check sort-check" id="chart-check-both"></i> Both</div>
+                                    <div class="dropdown-item" onclick="setChartFilter('income')"><i class="fas fa-check sort-check" id="chart-check-income" style="visibility:hidden"></i> Income only</div>
+                                    <div class="dropdown-item" onclick="setChartFilter('expense')"><i class="fas fa-check sort-check" id="chart-check-expense" style="visibility:hidden"></i> Expenses only</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container" id="chart-container"></div>
+                    <div class="chart-labels">
+                        <span>Jan</span>
+                        <span>Feb</span>
+                        <span>Mar</span>
+                        <span>Apr</span>
+                        <span>May</span>
+                        <span>Jun</span>
+                        <span>Jul</span>
+                        <span>Aug</span>
+                        <span>Sep</span>
+                        <span>Oct</span>
+                        <span>Nov</span>
+                        <span>Dec</span>
+                    </div>
+                    <div class="chart-legend">
+                        <span class="legend-item"><span class="legend-dot legend-income"></span> Income</span>
+                        <span class="legend-item"><span class="legend-dot legend-expense"></span> Expenses</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">All Expenses</h3>
+                        <button class="card-menu"><i class="fas fa-ellipsis-v"></i></button>
+                    </div>
+                    <div style="font-size: 12px; color: grey; margin-bottom: 16px;">Spending breakdown by category</div>
+                    <div class="expenses-breakdown">
+                        <div class="Total-expenses" id="total-all-expenses">K 0.00</div>
+
+                        <div class="period-tabs" id="expense-period-tabs">
+                            <span class="period-tab" data-period="daily" onclick="switchExpensePeriod('daily')">Daily</span>
+                            <span class="period-tab" data-period="weekly" onclick="switchExpensePeriod('weekly')">Weekly</span>
+                            <span class="period-tab-active" data-period="monthly" onclick="switchExpensePeriod('monthly')">Monthly</span>
+                        </div>
+                        <div class="period-amounts">
+                            <span>Daily</span>
+                            <span>Weekly</span>
+                            <span>Monthly</span>
+                        </div>
+                        <div class="period-values">
+                            <span id="period-val-daily">K0.00</span>
+                            <span id="period-val-weekly">K0.00</span>
+                            <span id="period-val-monthly">K0.00</span>
+                        </div>
+                        <div class="color-bar" id="expenses-color-bar"></div>
+                        <ul class="expense-categories" id="expense-categories-list"></ul>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-section" style="margin-top:32px;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Stats Overview</h3>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <div class="stat-box-label">Total Records</div>
+                            <div class="stat-box-value" id="stat-total-records">0</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-box-label">Total Spent</div>
+                            <div class="stat-box-value" id="stat-total-sum">K0.00</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-box-label">Top Category</div>
+                            <div class="stat-box-value" id="stat-top-category">—</div>
+                        </div>
+                    </div>
+                    <div style="font-size:12px;color:grey;margin:16px 0 8px;">Last 7 days (expenses)</div>
+                    <div class="trend-bars" id="trend-bars"></div>
+                </div>
+            </div>
+            <div class="card-transactions-section">
+                <div class="card-header">
+                    <h3 class="card-title">Recent Transactions</h3>
+                    <div class="filters">
+                        <div class="dropdown-wrapper" id="sort-wrapper">
+                            <button class="filter-btn" id="sort-btn" onclick="toggleSortDropdown()">
+                                <i class="fas fa-sort"></i> sort
+                            </button>
+                            <div class="filter-dropdown" id="sort-dropdown" style="display:none;">
+                                <div class="dropdown-item" data-sort="newest" onclick="setSort('newest')">
+                                    <i class="fas fa-check sort-check" id="check-newest"></i> Newest first
+                                </div>
+                                <div class="dropdown-item" data-sort="oldest" onclick="setSort('oldest')">
+                                    <i class="fas fa-check sort-check" id="check-oldest" style="visibility:hidden"></i> Oldest first
+                                </div>
+                                <div class="dropdown-item" data-sort="amount-high" onclick="setSort('amount-high')">
+                                    <i class="fas fa-check sort-check" id="check-amount-high" style="visibility:hidden"></i> Amount: High → Low
+                                </div>
+                                <div class="dropdown-item" data-sort="amount-low" onclick="setSort('amount-low')">
+                                    <i class="fas fa-check sort-check" id="check-amount-low" style="visibility:hidden"></i> Amount: Low → High
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dropdown-wrapper" id="filter-wrapper">
+                            <button class="filter-btn" id="filter-btn" onclick="toggleFilterDropdown()">
+                                <i class="fas fa-filter"></i> filter
+                            </button>
+                            <div class="filter-dropdown" id="filter-dropdown" style="display:none;">
+                                <div class="filter-dropdown-section">
+                                    <div class="filter-dropdown-label">TYPE</div>
+                                    <select id="filter-type-select" class="form-input filter-select" onchange="applyFilterInstant()">
+                                        <option value="">All Types</option>
+                                        <option value="income">Income</option>
+                                        <option value="expense">Expense</option>
+                                    </select>
+                                </div>
+                                <div class="filter-dropdown-section">
+                                    <div class="filter-dropdown-label">CATEGORY / SOURCE</div>
+                                    <select id="filter-cat-select" class="form-input filter-select" onchange="applyFilterInstant()">
+                                        <option value="">All</option>
+                                    </select>
+                                </div>
+                                <div class="filter-dropdown-footer">
+                                    <button class="btn-cancel" onclick="clearTransactionFilters()" style="width:100%;text-align:center;font-size:12.48px;">
+                                        <i class="fas fa-times"></i> Clear Filters
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="active-filters-bar" class="active-filters-bar" style="display:none;"></div>
+                <table class="transactions-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Category</th>
+                            <th>Amount</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Budgets setting are-->
+    <section class="tab-view" id="view-budgets" style="display:none;" role="tabpanel" aria-labelledby="tab-btn-budgets" aria-label="Budgets">
+        <div class="content">
+            <div class="page-title-row">
+                <h2 class="page-title">Monthly Budgets</h2>
+                <button class="btn-add-budget" onclick="OpenBudgetModal()">
+                    <i class="fas fa-plus"></i> Set Budget
+                </button>
+            </div>
+
+            <div class="budget-summary-row">
+                <div class="card budget-summary-card">
+                    <div class="card-title">Total Budgeted</div>
+                    <div class="amount" id="total-budgeted">K 0.00</div>
+                </div>
+                <div class="card budget-summary-card">
+                    <div class="card-title">Total Spent</div>
+                    <div class="amount" id="total-spent">K 0.00</div>
+                </div>
+                <div class="card budget-summary-card">
+                    <div class="card-title">Remaining</div>
+                    <div class="amount" id="total-remaining">K 0.00</div>
+                </div>
+            </div>
+
+            <div class="budget-grid" id="budget-grid"></div>
+        </div>
+    </section>
+
+    <!-- Records section-->
+    <section class="tab-view" id="view-records" style="display:none;" role="tabpanel" aria-labelledby="tab-btn-records" aria-label="Records">
+        <div class="content">
+            <div class="page-title-row">
+                <h2 class="page-title">All Records</h2>
+                <span id="records-count" class="records-count-badge"></span>
+            </div>
+            <div class="card records-controls">
+                <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+                    <select id="records-sort" class="form-input" style="max-width:190px;" onchange="setRecordsSort(this.value)">
+                        <option value="newest">Newest first</option>
+                        <option value="oldest">Oldest first</option>
+                        <option value="title-az">Title: A → Z</option>
+                        <option value="title-za">Title: Z → A</option>
+                        <option value="amount-high">Amount: High → Low</option>
+                        <option value="amount-low">Amount: Low → High</option>
+                    </select>
+                    <select id="records-filter-type" class="form-input" style="max-width:150px;" onchange="setRecordsFilterType(this.value)">
+                        <option value="">All Types</option>
+                        <option value="income">Income only</option>
+                        <option value="expense">Expenses only</option>
+                    </select>
+                </div>
+                <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:12px;">
+                    <label for="records-search-input" class="sr-only">Search records with a regex pattern</label>
+                    <input type="text" id="records-search-input" class="form-input" style="max-width:260px;"
+                        placeholder="Regex search (e.g. coffee|tea)" aria-describedby="records-search-status"
+                        oninput="setRecordsSearch(this.value)" />
+                    <label style="display:flex;align-items:center;gap:6.4px;font-size:12.8px;color:dimgray;">
+                        <input type="checkbox" id="records-search-ci" checked onchange="setRecordsSearchCI(this.checked)" />
+                        Case-insensitive
+                    </label>
+                </div>
+                <div id="records-search-status" role="status" aria-live="polite" style="font-size:12.48px;color:crimson;margin-top:6.4px;"></div>
+            </div>
+            <div class="records-table-wrapper card" style="margin-top:0;">
+                <table class="transactions-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Category / Source</th>
+                            <th>Amount</th>
+                            <th>Description</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="records-tbody"></tbody>
+                </table>
+            </div>
+            <div id="records-cards" class="records-cards"></div>
+        </div>
+    </section>
+
+    <!-- Settings sections / tab -->
+    <section class="tab-view" id="view-settings" style="display:none;" role="tabpanel" aria-labelledby="tab-btn-settings" aria-label="Settings">
+        <div class="content">
+            <h2 class="page-title" style="margin-bottom:24px;">Settings</h2>
+
+            <div class="settings-section">
+                <div class="settings-section-title">Data</div>
+                <div class="card settings-card">
+                    <div class="settings-row">
+                        <div class="settings-label">
+                            <span class="settings-label-title">Export JSON</span>
+                            <span class="settings-label-desc">Download all your data as a JSON file</span>
+                        </div>
+                        <button class="btn-settings-action" onclick="exportJSON()" aria-label="Export transactions as JSON">
+                            <i class="fas fa-download"></i> Export JSON
+                        </button>
+                    </div>
+                    <div class="settings-divider"></div>
+                    <div class="settings-row">
+                        <div class="settings-label">
+                            <span class="settings-label-title">Import JSON</span>
+                            <span class="settings-label-desc">Load records from a JSON file (structure is validated first)</span>
+                        </div>
+                        <button class="btn-settings-action" onclick="triggerJSONImport()" aria-label="Import transactions from JSON file">
+                            <i class="fas fa-upload"></i> Import JSON
+                        </button>
+                        <input type="file" id="json-import-input" accept=".json,application/json"
+                            style="display:none" onchange="handleJSONImport(this.files[0]); this.value='';" />
+                    </div>
+                    <div class="settings-divider"></div>
+                    <div class="settings-row">
+                        <div class="settings-label">
+                            <span class="settings-label-title">Export CSV</span>
+                            <span class="settings-label-desc">Download all your data as a CSV file</span>
+                        </div>
+                        <button class="btn-settings-action" onclick="exportCSV()" aria-label="Export transactions as CSV">
+                            <i class="fas fa-download"></i> Export CSV
+                        </button>
+                    </div>
+                    <div class="settings-divider"></div>
+                    <div class="settings-row">
+                        <div class="settings-label">
+                            <span class="settings-label-title">Clear All Data</span>
+                            <span class="settings-label-desc">Permanently delete all transactions and budgets</span>
+                        </div>
+                        <button class="btn-settings-danger" onclick="clearAllData()" aria-label="Clear all data">
+                            <i class="fas fa-trash"></i> Clear Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About the app-->
+    <section class="tab-view" id="view-about" style="display:none;" role="tabpanel" aria-labelledby="tab-btn-about" aria-label="About">
+        <div class="content">
+            <div class="about-hero">
+                <div class="about-icon"><i class="fas fa-wallet"></i></div>
+                <h2 class="about-app-name">Student Finance Tracker</h2>
+                <p class="about-tagline">Smart money management for students</p>
+            </div>
+            <div class="about-grid">
+                <div class="card about-card">
+                    <h3 class="about-card-title"><i class="fas fa-bullseye"></i> Purpose</h3>
+                    <p class="about-card-text">
+                        Student Finance Tracker helps students take control of their money by logging income and expenses,
+                        setting budgets per category, and visualising spending patterns all stored locally in their
+                        browser with no account required.
+                    </p>
+                </div>
+                      <!-- contact me -->
+                <div class="card about-card">
+                    <h3 class="about-card-title"><i class="fas fa-address-card"></i> Contact</h3>
+                    <div class="about-contacts">
+                        <a href="mailto:g.mweene@alustudent.com" class="about-contact-link">
+                            <i class="fas fa-envelope"></i>
+                            g.mweene@alustudent.com
+                        </a>
+                        <a href="https://github.com/gmweene-wq" target="_blank" rel="noopener" class="about-contact-link">
+                            <i class="fab fa-github"></i>
+                            github.com/gmweene-wq
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    </main>
+    <footer class="site-footer">
+        <span>Student Finance Tracker</span>
+        <span>By Griphen Mweene</span>
+    </footer>
+
+    <!-- Income sources -->
+    <div class="modal-overlay" id="incomeModal" role="dialog" aria-modal="true" aria-labelledby="income-modal-title">
+        <div class="modal-card modal-income">
+            <div class="modal-header">
+                <div class="modal-icon modal-icon-income"><i class="fas fa-arrow-down"></i></div>
+                <h3 id="income-modal-title">Add Income</h3>
+                <button class="modal-close" onclick="CloseIncomeModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <form class="modal-form" id="income-form" onsubmit="SubmitIncome(event)" novalidate>
+                <div class="form-group">
+                    <label for="income-amount-input">Amount (K)</label>
+                    <div class="input-prefix">
+                        <span>K</span>
+                        <input id="income-amount-input" type="number" min="0" step="0.01" placeholder="0.00" class="form-input"
+                            required aria-describedby="income-amount-error" oninput="validateAndShow('income-amount-input','income-amount-error',validateAmount)" />
+                    </div>
+                    <div id="income-amount-error" class="field-error" role="alert" aria-live="polite" style="display:none;"></div>
+                </div>
+                <div class="form-group">
+                    <label for="income-source-select">Source</label>
+                    <select id="income-source-select" class="form-input" onchange="toggleOtherNote('income-other-note-group', this.value)">
+                        <option value="">Select source</option>
+                        <option>Stipend / Salary</option>
+                        <option>Family support</option>
+                        <option>Business</option>
+                        <option>Investment</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+                <div class="form-group" id="income-other-note-group" style="display:none;">
+                    <label for="income-other-note-input">What was it for?</label>
+                    <input id="income-other-note-input" type="text" placeholder="Specify the income source..." class="form-input"
+                        aria-describedby="income-other-note-error" oninput="validateAndShow('income-other-note-input','income-other-note-error',validateDescription)" />
+                    <div id="income-other-note-error" class="field-error" role="alert" aria-live="polite" style="display:none;"></div>
+                </div>
+                <div class="form-group">
+                    <label for="income-date-input">Date</label>
+                    <input id="income-date-input" type="date" class="form-input" required
+                        aria-describedby="income-date-error" oninput="validateAndShow('income-date-input','income-date-error',validateDate)" />
+                    <div id="income-date-error" class="field-error" role="alert" aria-live="polite" style="display:none;"></div>
+                </div>
+                <div class="form-group">
+                    <label for="income-desc-input">Description <span class="optional">(optional)</span></label>
+                    <input id="income-desc-input" type="text" placeholder="e.g. Monthly salary..." class="form-input"
+                        aria-describedby="income-desc-error" oninput="validateAndShow('income-desc-input','income-desc-error',validateDescription)" />
+                    <div id="income-desc-error" class="field-error" role="alert" aria-live="polite" style="display:none;"></div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="CloseIncomeModal()">Cancel</button>
+                    <button type="submit" class="btn-submit btn-income-submit" id="income-submit-btn">Add Income</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Expense of the money ( add expenses) -->
+    <div class="modal-overlay" id="expenseModal" role="dialog" aria-modal="true" aria-labelledby="expense-modal-title">
+        <div class="modal-card modal-expense">
+            <div class="modal-header">
+                <div class="modal-icon modal-icon-expense"><i class="fas fa-arrow-up"></i></div>
+                <h3 id="expense-modal-title">Add Expense</h3>
+                <button class="modal-close" onclick="CloseExpenseModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <form class="modal-form" id="expense-form" onsubmit="SubmitExpense(event)" novalidate>
+                <div class="form-group">
+                    <label for="expense-amount-input">Amount (K)</label>
+                    <div class="input-prefix">
+                        <span>K</span>
+                        <input id="expense-amount-input" type="number" min="0" step="0.01" placeholder="0.00" class="form-input"
+                            required aria-describedby="expense-amount-error" oninput="validateAndShow('expense-amount-input','expense-amount-error',validateAmount)" />
+                    </div>
+                    <div id="expense-amount-error" class="field-error" role="alert" aria-live="polite" style="display:none;"></div>
+                </div>
+                <div class="form-group">
+                    <label for="expense-category-select">Category</label>
+                    <select id="expense-category-select" class="form-input" required onchange="toggleOtherNote('expense-other-note-group', this.value)">
+                        <option value="">Select category</option>
+                    </select>
+                    <button type="button" class="manage-categories-link" onclick="OpenCategoriesModal()">
+                        <i class="fas fa-pen"></i> Manage categories
+                    </button>
+                </div>
+                <div class="form-group" id="expense-other-note-group" style="display:none;">
+                    <label for="expense-other-note-input">What was it for?</label>
+                    <input id="expense-other-note-input" type="text" placeholder="Specify what you spent on..." class="form-input"
+                        aria-describedby="expense-other-note-error" oninput="validateAndShow('expense-other-note-input','expense-other-note-error',validateDescription)" />
+                    <div id="expense-other-note-error" class="field-error" role="alert" aria-live="polite" style="display:none;"></div>
+                </div>
+                <div class="form-group">
+                    <label for="expense-date-input">Date</label>
+                    <input id="expense-date-input" type="date" class="form-input" required
+                        aria-describedby="expense-date-error" oninput="validateAndShow('expense-date-input','expense-date-error',validateDate)" />
+                    <div id="expense-date-error" class="field-error" role="alert" aria-live="polite" style="display:none;"></div>
+                </div>
+                <div class="form-group">
+                    <label for="expense-desc-input">Description <span class="optional">(optional)</span></label>
+                    <input id="expense-desc-input" type="text" placeholder="e.g. Grocery shopping..." class="form-input"
+                        aria-describedby="expense-desc-error" oninput="validateAndShow('expense-desc-input','expense-desc-error',validateDescription)" />
+                    <div id="expense-desc-error" class="field-error" role="alert" aria-live="polite" style="display:none;"></div>
+                </div>
+                <div id="expense-modal-error" class="budget-error" role="alert" aria-live="assertive" style="display:none;"></div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="CloseExpenseModal()">Cancel</button>
+                    <button type="submit" class="btn-submit btn-expense-submit" id="expense-submit-btn">Add Expense</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Categories -->
+    <div class="modal-overlay" id="categoriesModal" role="dialog" aria-modal="true" aria-labelledby="categories-modal-title">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-icon modal-icon-categories"><i class="fas fa-tags"></i></div>
+                <h3 id="categories-modal-title">Manage Categories</h3>
+                <button class="modal-close" onclick="CloseCategoriesModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <p class="categories-hint">Click a name to rename it.</p>
+            <div id="categories-list" class="categories-list"></div>
+            <div class="add-category-row">
+                <label for="new-category-input" class="sr-only">New category name</label>
+                <input type="text" id="new-category-input" class="form-input" placeholder="New category name..."
+                    aria-describedby="new-category-error" oninput="validateAndShow('new-category-input','new-category-error',validateCategory)" />
+                <button type="button" class="btn-add-category" onclick="AddCategory()">
+                    <i class="fas fa-plus"></i> Add
+                </button>
+            </div>
+            <div id="new-category-error" class="field-error" role="alert" aria-live="polite" style="display:none;margin-bottom:12px;"></div>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="CloseCategoriesModal()">Cancel</button>
+                <button type="button" class="btn-submit btn-income-submit" onclick="SaveCategories()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Budget setting section -->
+    <div class="modal-overlay" id="budgetModal" role="dialog" aria-modal="true" aria-labelledby="budget-modal-title">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-icon modal-icon-budget"><i class="fas fa-wallet"></i></div>
+                <h3 id="budget-modal-title">Set Budget</h3>
+                <button class="modal-close" onclick="CloseBudgetModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <form class="modal-form" onsubmit="SubmitBudget(event)">
+                <div class="form-group">
+                    <label for="budget-cat-select">Category</label>
+                    <select id="budget-cat-select" class="form-input"></select>
+                    <span id="budget-cat-display"
+                        style="display:none; font-weight:600; color:#1e293b; padding:6.4px 0; font-size:15.2px;"></span>
+                </div>
+                <div class="form-group">
+                    <label for="budget-limit-input">Monthly Budget Limit (K)</label>
+                    <div class="input-prefix">
+                        <span>K</span>
+                        <input type="number" id="budget-limit-input" min="0" step="0.01" placeholder="0.00"
+                            class="form-input" required aria-describedby="budget-limit-error"
+                            oninput="validateAndShow('budget-limit-input','budget-limit-error',validateAmount)" />
+                    </div>
+                    <div id="budget-limit-error" class="field-error" role="alert" aria-live="polite" style="display:none;"></div>
+                </div>
+                <div id="budget-error" class="budget-error" role="alert" aria-live="assertive" style="display:none;"></div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="CloseBudgetModal()">Cancel</button>
+                    <button type="submit" class="btn-submit btn-income-submit">Save Budget</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Search button for tansactions -->
+    <div class="modal-overlay" id="searchModal" role="dialog" aria-modal="true" aria-labelledby="search-modal-title">
+        <div class="modal-card modal-search">
+            <div class="modal-header">
+                <div class="modal-icon modal-icon-search"><i class="fas fa-search"></i></div>
+                <h3 id="search-modal-title">Search Transactions</h3>
+                <button class="modal-close" onclick="CloseSearchModal()"><i class="fas fa-times"></i></button>
+            </div>
+
+            <div class="search-filters">
+                <div class="search-input-wrapper">
+                    <label for="search-query" class="sr-only">Search by regex pattern</label>
+                    <i class="fas fa-search search-icon" aria-hidden="true"></i>
+                    <input type="text" id="search-query" class="search-input"
+                        placeholder="Regex search, e.g. (coffee|tea)" oninput="runSearch()" />
+                </div>
+                <select id="search-category" class="form-input search-filter-select">
+                    <option value="">All Categories</option>
+                </select>
+                <select id="search-type" class="form-input search-filter-select">
+                    <option value="">All Types</option>
+                    <option value="income">Income</option>
+                    <option value="expense">Expense</option>
+                </select>
+                <label for="search-from" class="sr-only">From date</label>
+                <input type="date" id="search-from" class="form-input search-filter-select" title="From date" />
+                <label for="search-to" class="sr-only">To date</label>
+                <input type="date" id="search-to" class="form-input search-filter-select" title="To date" />
+                <button class="btn-search" onclick="runSearch()">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </div>
+            <div id="search-status" role="status" aria-live="polite" style="font-size:12.48px;color:crimson;margin-top:8px;"</div>
+
+            <div class="card" id="search-results-card" style="margin-top: 24px; display: none;">
+                <div class="card-header">
+                    <h3 class="card-title">Results</h3>
+                    <span id="results-count" style="font-size: 12.8px; color: #6b7280;"></span>
+                </div>
+                <table class="transactions-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Category</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="search-results-body"></tbody>
+                </table>
+            </div>
+
+            <div id="search-empty"
+                style="display: none; text-align: center; padding: 48px; color: #9ca3af;">
+                <i class="fas fa-search" style="font-size: 32px; margin-bottom: 16px; display: block;"></i>
+                No transactions found matching your search.
+            </div>
+        </div>
+    </div>
+
+    <!-- buttons for adding income/ expense -->
+    <div class="add-buttons">
+        <button class="fab fab-income" onclick="OpenIncomeModel()" title="Add Income" aria-label="Add Income">
+            <i class="fas fa-plus"></i>
+        </button>
+    </div>
+    <div class="add-buttons">
+        <button class="fab fab-expenses" onclick="OpenExpenseModel()" title="Add Expense" aria-label="Add Expense">
+            <i class="fas fa-minus"></i>
+        </button>
+    </div>
+
+    <script src="scripts/storage.js"></script>
+    <script src="scripts/state.js"></script>
+    <script src="scripts/validators.js"></script>
+    <script src="scripts/search.js"></script>
+    <script src="scripts/ui.js"></script>
+    <script src="scripts/main.js"></script>
+</body>
+</html>
