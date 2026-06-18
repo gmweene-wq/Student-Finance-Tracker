@@ -1,0 +1,98 @@
+[
+  {
+    "id": "rec_0001",
+    "type": "income",
+    "description": "Monthly stipend",
+    "amount": 2500.00,
+    "category": null,
+    "source": "Stipend",
+    "otherNote": "",
+    "date": "2026-06-01",
+    "createdAt": "2026-06-01T08:00:00.000Z",
+    "updatedAt": "2026-06-01T08:00:00.000Z"
+  },
+  {
+    "id": "rec_0002",
+    "type": "income",
+    "description": "Weekend tutoring gig",
+    "amount": 350.00,
+    "category": null,
+    "source": "Business",
+    "otherNote": "",
+    "date": "2026-06-05",
+    "createdAt": "2026-06-05T14:30:00.000Z",
+    "updatedAt": "2026-06-05T14:30:00.000Z"
+  },
+  {
+    "id": "rec_0003",
+    "type": "expense",
+    "description": "Lunch at cafeteria",
+    "amount": 12.50,
+    "category": "Food",
+    "source": null,
+    "otherNote": "",
+    "date": "2026-06-02",
+    "createdAt": "2026-06-02T12:31:00.000Z",
+    "updatedAt": "2026-06-02T12:31:00.000Z"
+  },
+  {
+    "id": "rec_0004",
+    "type": "expense",
+    "description": "Textbook for CS301",
+    "amount": 240.00,
+    "category": "Books",
+    "source": null,
+    "otherNote": "",
+    "date": "2026-06-03",
+    "createdAt": "2026-06-03T10:00:00.000Z",
+    "updatedAt": "2026-06-03T10:00:00.000Z"
+  },
+  {
+    "id": "rec_0005",
+    "type": "expense",
+    "description": "Bus fare to campus",
+    "amount": 18.00,
+    "category": "Transport",
+    "source": null,
+    "otherNote": "",
+    "date": "2026-06-04",
+    "createdAt": "2026-06-04T07:45:00.000Z",
+    "updatedAt": "2026-06-04T07:45:00.000Z"
+  },
+  {
+    "id": "rec_0006",
+    "type": "expense",
+    "description": "Movie night",
+    "amount": 55.00,
+    "category": "Entertainment",
+    "source": null,
+    "otherNote": "",
+    "date": "2026-06-06",
+    "createdAt": "2026-06-06T19:15:00.000Z",
+    "updatedAt": "2026-06-06T19:15:00.000Z"
+  },
+  {
+    "id": "rec_0007",
+    "type": "expense",
+    "description": "Lab fee",
+    "amount": 120.00,
+    "category": "Fees",
+    "source": null,
+    "otherNote": "",
+    "date": "2026-06-07",
+    "createdAt": "2026-06-07T09:00:00.000Z",
+    "updatedAt": "2026-06-07T09:00:00.000Z"
+  },
+  {
+    "id": "rec_0008",
+    "type": "expense",
+    "description": "Other: Printing course notes",
+    "amount": 30.00,
+    "category": "Other",
+    "source": null,
+    "otherNote": "Printing course notes",
+    "date": "2026-06-08",
+    "createdAt": "2026-06-08T16:20:00.000Z",
+    "updatedAt": "2026-06-08T16:20:00.000Z"
+  }
+]
