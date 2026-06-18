@@ -500,9 +500,12 @@ function CloseIncomeModal() {
 function SubmitIncome(e) {
     e.preventDefault();
     var amountValid = validateAndShow('income-amount-input', 'income-amount-error', validateAmount);
+    var sourceValid  = validateAndShow('income-source-select', 'income-source-error', validateSource);
     var dateValid    = validateAndShow('income-date-input', 'income-date-error', validateDate);
     var descValid    = validateAndShow('income-desc-input', 'income-desc-error', validateDescription);
     if (amountValid === false) {
+        return;
+    } else if (sourceValid === false) {
         return;
     } else if (dateValid === false) {
         return;
@@ -571,10 +574,13 @@ function CloseExpenseModal() {
 // Validates the expense form, checks it against the category budget, then saves it.
 function SubmitExpense(e) {
     e.preventDefault();
-    var amountValid = validateAndShow('expense-amount-input', 'expense-amount-error', validateAmount);
+    var amountValid   = validateAndShow('expense-amount-input', 'expense-amount-error', validateAmount);
+    var categoryValid = validateAndShow('expense-category-select', 'expense-category-error', validateCategory);
     var dateValid    = validateAndShow('expense-date-input', 'expense-date-error', validateDate);
     var descValid    = validateAndShow('expense-desc-input', 'expense-desc-error', validateDescription);
     if (amountValid === false) {
+        return;
+    } else if (categoryValid === false) {
         return;
     } else if (dateValid === false) {
         return;
@@ -593,8 +599,6 @@ function SubmitExpense(e) {
     if (!amount) {
         return;
     } else if (!date) {
-        return;
-    } else if (!category) {
         return;
     }
 

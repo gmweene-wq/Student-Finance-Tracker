@@ -436,7 +436,8 @@
                 </div>
                 <div class="form-group">
                     <label for="income-source-select">Source</label>
-                    <select id="income-source-select" class="form-input" onchange="toggleOtherNote('income-other-note-group', this.value)">
+                    <select id="income-source-select" class="form-input" required aria-describedby="income-source-error"
+                        onchange="toggleOtherNote('income-other-note-group', this.value); validateAndShow('income-source-select','income-source-error',validateSource)">
                         <option value="">Select source</option>
                         <option>Stipend / Salary</option>
                         <option>Family support</option>
@@ -444,6 +445,7 @@
                         <option>Investment</option>
                         <option>Other</option>
                     </select>
+                    <div id="income-source-error" class="field-error" role="alert" aria-live="polite" style="display:none;"></div>
                 </div>
                 <div class="form-group" id="income-other-note-group" style="display:none;">
                     <label for="income-other-note-input">What was it for?</label>
@@ -458,9 +460,9 @@
                     <div id="income-date-error" class="field-error" role="alert" aria-live="polite" style="display:none;"></div>
                 </div>
                 <div class="form-group">
-                    <label for="income-desc-input">Description <span class="optional">(optional)</span></label>
+                    <label for="income-desc-input">Description</label>
                     <input id="income-desc-input" type="text" placeholder="e.g. Monthly salary..." class="form-input"
-                        aria-describedby="income-desc-error" oninput="validateAndShow('income-desc-input','income-desc-error',validateDescription)" />
+                        required aria-describedby="income-desc-error" oninput="validateAndShow('income-desc-input','income-desc-error',validateDescription)" />
                     <div id="income-desc-error" class="field-error" role="alert" aria-live="polite" style="display:none;"></div>
                 </div>
                 <div class="modal-actions">
@@ -491,9 +493,11 @@
                 </div>
                 <div class="form-group">
                     <label for="expense-category-select">Category</label>
-                    <select id="expense-category-select" class="form-input" required onchange="toggleOtherNote('expense-other-note-group', this.value)">
+                    <select id="expense-category-select" class="form-input" required aria-describedby="expense-category-error"
+                        onchange="toggleOtherNote('expense-other-note-group', this.value); validateAndShow('expense-category-select','expense-category-error',validateCategory)">
                         <option value="">Select category</option>
                     </select>
+                    <div id="expense-category-error" class="field-error" role="alert" aria-live="polite" style="display:none;"></div>
                     <button type="button" class="manage-categories-link" onclick="OpenCategoriesModal()">
                         <i class="fas fa-pen"></i> Manage categories
                     </button>
@@ -511,9 +515,9 @@
                     <div id="expense-date-error" class="field-error" role="alert" aria-live="polite" style="display:none;"></div>
                 </div>
                 <div class="form-group">
-                    <label for="expense-desc-input">Description <span class="optional">(optional)</span></label>
+                    <label for="expense-desc-input">Description</label>
                     <input id="expense-desc-input" type="text" placeholder="e.g. Grocery shopping..." class="form-input"
-                        aria-describedby="expense-desc-error" oninput="validateAndShow('expense-desc-input','expense-desc-error',validateDescription)" />
+                        required aria-describedby="expense-desc-error" oninput="validateAndShow('expense-desc-input','expense-desc-error',validateDescription)" />
                     <div id="expense-desc-error" class="field-error" role="alert" aria-live="polite" style="display:none;"></div>
                 </div>
                 <div id="expense-modal-error" class="budget-error" role="alert" aria-live="assertive" style="display:none;"></div>
@@ -617,7 +621,7 @@
                     <i class="fas fa-search"></i> Search
                 </button>
             </div>
-            <div id="search-status" role="status" aria-live="polite" style="font-size:12.48px;color:crimson;margin-top:8px;"</div>
+            <div id="search-status" role="status" aria-live="polite" style="font-size:12.48px;color:crimson;margin-top:8px;"></div>
 
             <div class="card" id="search-results-card" style="margin-top: 24px; display: none;">
                 <div class="card-header">

@@ -11,7 +11,7 @@ var DUPLICATE_WORD_RE = /\b(\w+)\s+\1\b/i;
 function validateDescription(value) {
     var isEmpty = ['', undefined, null].includes(value);
     if (isEmpty) {
-        return { valid: true, message: '' };
+        return { valid: false, message: 'Description is required.' };
     }
     if (!DESCRIPTION_RE.test(value)) {
         return { valid: false, message: 'Remove leading or trailing spaces.' };
@@ -45,6 +45,13 @@ function validateCategory(value) {
     }
     if (!CATEGORY_RE.test(value)) {
         return { valid: false, message: 'Use letters, spaces, or hyphens only (e.g. "Side Hustle").' };
+    }
+    return { valid: true, message: '' };
+}
+
+function validateSource(value) {
+    if (!value) {
+        return { valid: false, message: 'Select a source.' };
     }
     return { valid: true, message: '' };
 }
