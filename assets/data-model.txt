@@ -1,0 +1,50 @@
+
+1. APP OVERVIEW
+
+A single-page, client-side finance tracker for students.
+No account required. All data is persisted to localStorage.
+Users log income and expenses, set monthly budgets per category,
+search/filter records, and export their data as JSON or CSV.
+
+Tech stack: Vanilla HTML · CSS · JavaScript (no frameworks, no build step)
+
+
+
+2. DATA MODEL
+
+Every transaction record stored in localStorage key "transactions" (JSON array).
+
+Example record:
+{
+  "id":          "rec_0001",
+  "type":        "expense",
+  "description": "Lunch at cafeteria",
+  "amount":      12.50,
+  "category":    "Food",
+  "source":      null,
+  "otherNote":   "",
+  "date":        "2025-09-29",
+  "createdAt":   "2025-09-29T10:31:00.000Z",
+  "updatedAt":   "2025-09-29T10:31:00.000Z"
+}
+
+Field reference
+---------------
+id          string   REQUIRED  Sequential: "rec_0001", "rec_0002", …
+type        string   REQUIRED  "income" or "expense"
+description string   optional  Free-text note
+amount      number   REQUIRED  Positive decimal (Zambian Kwacha)
+category    string   cond.     Expense only (Food, Books, Transport, …)
+source      string   cond.     Income only (Stipend, Family support, …)
+otherNote   string   optional  Filled when category/source is "Other"
+date        string   REQUIRED  ISO date YYYY-MM-DD
+createdAt   string   REQUIRED  ISO 8601 timestamp, set once on creation
+updatedAt   string   REQUIRED  ISO 8601 timestamp, updated on every edit
+
+Supporting localStorage keys
+-----------------------------
+"transactions"       JSON array of records (above)
+"expense_categories" JSON array of category name strings
+"budgets"            JSON object { categoryName: { limit: number } }
+"card_holder_name"   string
+"rec_counter"        integer (auto-increment seed for generateId)
