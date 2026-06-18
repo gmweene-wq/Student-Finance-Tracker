@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Student Finance Tracker  Tests</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 720px; margin: 40px auto; color: darkslategray; }
+        h1 { font-size: 20px; }
+        #summary { font-weight: 600; margin-bottom: 16px; }
+        .pass { color: seagreen; }
+        .fail { color: crimson; }
+        li { padding: 4px 0; font-size: 14px; }
+        .msg { color: gray; font-size: 12.5px; margin-left: 8px; }
+    </style>
+</head>
+
+<body>
+    <h1>Student Finance Tracker — Tests</h1>
+    <p style="color:gray;font-size:13px;">
+        These are simple checks that run right in the browser. There is no
+        testing framework here just plain JavaScript functions that check
+        if our code behaves the way we expect.
+    </p>
+    <div id="summary"></div>
+    <ul id="results"></ul>
+
+    <script src="scripts/storage.js"></script>
+    <script src="scripts/state.js"></script>
+    <script src="scripts/validators.js"></script>
+    <script>
+        // This list will hold every test we register with the test() function below.
+        var allTests = [];
+
+        // Counters so we can show how many tests passed or failed at the end.
+        var passCount = 0;
+        var failCount = 0;
+
+        // Call this function to register a new test.
+        
+        function test(name, fn) {
+            allTests.push({ name: name, fn: fn });
+        }
+
+        // Throws an error (which fails the test) if "condition" is not true.
+        function assert(condition, message) {
+            if (!condition) {
+                var errorMessage;
+                if (message) {
+                    errorMessage = message;
+                } else {
+                    errorMessage = 'Assertion failed';
+                }
+                throw new Error(errorMessage);
+            }
+        }
+
+        // Throws an error if "actual" is not the same as expected. Shows both values in the error message so it's easy to see what went wrong.
+        function assertEqual(actual, expected, message) {
+            if (actual !== expected) {
+                var prefix;
+                if (message) {
+                    prefix = message;
+                } else {
+                    prefix = 'Values not equal';
+                }
+                throw new Error(
+                    prefix +
+                    ' — expected ' + JSON.stringify(expected) +
+                    ', got ' + JSON.stringify(actual)
+                );
+            }
+        }
+
+        // localStorage keys the app uses; tests snapshot and restore them so real user data is never lost.
+        var STORAGE_KEYS = ['transactions', 'expense_categories', 'budgets', 'rec_counter', 'cardVisibility', 'budgets_version'];
+
+        // Saves a copy of the real localStorage values before testing starts.
+        function snapshotStorage() {
+            var snapshot = {};
+            for (var i = 0; i < STORAGE_KEYS.length; i++) {
+                var key = STORAGE_KEYS[i];
+                snapshot[key] = localStorage.getItem(key);
+            }
+            return snapshot;
+        }
+
+        // Puts the real values back into localStorage after testing.
+        function restoreStorage(snapshot) {
+            for (var i = 0; i < STORAGE_KEYS.length; i++) {
+                var key = STORAGE_KEYS[i];
+                if (snapshot[key] === null) {
+                    localStorage.removeItem(key);
+                } else {
+                    localStorage.setItem(key, snapshot[key]);
+                }
+            }
+        }
+
+        // delete the tests to starts with a clean slate.
+        function clearStorage() {
+            for (var i = 0; i < STORAGE_KEYS.length; i++) {
+                localStorage.removeItem(STORAGE_KEYS[i]);
+            }
+        }
+
+        // Runs every test registered and show the results.
+        function runAll() {
+            var savedData = snapshotStorage();
+            var resultsList = document.getElementById('results');
+
+            for (var i = 0; i < allTests.length; i++) {
+                var currentTest = allTests[i];
+
+                // Start each test with empty storage.
+                clearStorage();
+
+                var listItem = document.createElement('li');
+
+                try {
+                    currentTest.fn();
+                    passCount++;
+                    listItem.innerHTML = '<span class="pass">✓ PASS</span> — ' + currentTest.name;
+                } catch (error) {
+                    failCount++;
+                    listItem.innerHTML =
+                        '<span class="fail">✗ FAIL</span> — ' + currentTest.name +
+                        '<span class="msg">' + error.message + '</span>';
+                }
+
+                resultsList.appendChild(listItem);
+            }
+
+            // Put the user's real data back after testing
+            restoreStorage(savedData);
+
+            var summaryEl = document.getElementById('summary');
+            summaryEl.innerHTML = passCount + ' passed, ' + failCount + ' failed (' + allTests.length + ' total)';
+        }
+
+        // Tests for storage.js
+
+        test('generateId() produces sequential, zero-padded ids', function() {
+            var first = generateId();
+            var second = generateId();
+            assertEqual(first, 'rec_0001');
+            assertEqual(second, 'rec_0002');
+        });
+
+        test('getCategories() falls back to defaults when nothing stored', function() {
+            assertEqual(JSON.stringify(getCategories()), JSON.stringify(DEFAULT_CATEGORIES));
+        });
+
+        test('saveCategoriesToStorage() / getCategories() round-trip', function() {
+            saveCategoriesToStorage(['Food', 'Rent']);
+            assertEqual(JSON.stringify(getCategories()), JSON.stringify(['Food', 'Rent']));
+        });
+
+        test('saveTransactions() / getTransactions() round-trip', function() {
+            var txns = [{ id: 'rec_0001', type: 'income', amount: 100, date: '2026-06-01' }];
+            saveTransactions(txns);
+            assertEqual(getTransactions().length, 1);
+            assertEqual(getTransactions()[0].id, 'rec_0001');
+        });
+
+        test('getCategoryColor() returns a mapped color for known categories', function() {
+            assertEqual(getCategoryColor('Food', 0), CATEGORY_COLORS['food']);
+        });
+
+        test('getCategoryColor() falls back to the palette for unknown categories', function() {
+            assertEqual(getCategoryColor('Side Hustle', 0), COLOR_PALETTE[0]);
+        });
+
+        test('getTransactionLabel() uses category for expenses, source for income', function() {
+            assertEqual(getTransactionLabel({ type: 'expense', category: 'Food' }), 'Food');
+            assertEqual(getTransactionLabel({ type: 'income', source: 'Stipend' }), 'Stipend');
+        });
+
+        test('getTransactionLabel() surfaces otherNote when category/source is Other', function() {
+            assertEqual(getTransactionLabel({ type: 'expense', category: 'Other', otherNote: 'Printing' }), 'Other: Printing');
+        });
+
+        test('getTotalIncome() sums only income transactions', function() {
+            saveTransactions([
+                { id: 'rec_0001', type: 'income', amount: 100, date: '2026-06-01' },
+                { id: 'rec_0002', type: 'expense', amount: 40, date: '2026-06-01', category: 'Food' }
+            ]);
+            assertEqual(getTotalIncome(), 100);
+        });
+
+        // Tests for validators.js file
+
+        test('checkCategoryBudget() returns null when under budget', function() {
+            saveBudgets({ Food: { limit: 100 } });
+            saveTransactions([]);
+            assertEqual(checkCategoryBudget('Food', 50, null), null);
+        });
+
+        test('checkCategoryBudget() flags an over-budget spend', function() {
+            var today = new Date().toISOString().split('T')[0];
+            saveBudgets({ Food: { limit: 100 } });
+            saveTransactions([{ id: 'rec_0001', type: 'expense', category: 'Food', amount: 80, date: today }]);
+            var result = checkCategoryBudget('Food', 30, null);
+            assert(result !== null, 'expected an over-budget result');
+            assertEqual(result.limit, 100);
+            assertEqual(result.spent, 80);
+        });
+
+        test('validateJSONImport() accepts a well-formed array', function() {
+            var data = [{ id: 'rec_0001', type: 'income', amount: 10, date: '2026-06-01', source: 'Stipend' }];
+            assertEqual(validateJSONImport(data), true);
+        });
+
+        test('validateJSONImport() rejects a non-array', function() {
+            assertEqual(validateJSONImport({}), false);
+        });
+
+        test('validateJSONImport() rejects records missing required fields', function() {
+            // This record is missing "amount" on purpose.
+            var data = [{ id: 'rec_0001', type: 'income', date: '2026-06-01' }];
+            assertEqual(validateJSONImport(data), false);
+        });
+
+        test('validateJSONImport() rejects an unknown type', function() {
+            var data = [{ id: 'rec_0001', type: 'transfer', amount: 10, date: '2026-06-01', category: 'Food' }];
+            assertEqual(validateJSONImport(data), false);
+        });
+
+        // Tests for validators.js — regex rules
+
+        test('validateDescription() rejects leading/trailing spaces', function() {
+            assertEqual(validateDescription(' Lunch').valid, false);
+            assertEqual(validateDescription('Lunch ').valid, false);
+        });
+
+        test('validateDescription() rejects double spaces', function() {
+            assertEqual(validateDescription('Lunch  at cafeteria').valid, false);
+        });
+
+        test('validateDescription() accepts a clean description', function() {
+            assertEqual(validateDescription('Lunch at cafeteria').valid, true);
+        });
+
+        test('validateDescription() flags a duplicated word', function() {
+            assertEqual(validateDescription('the the lunch').valid, false);
+            assertEqual(validateDescription('lunch lunch today').valid, false);
+        });
+
+        test('validateAmount() accepts a positive number with up to 2 decimals', function() {
+            assertEqual(validateAmount('12.50').valid, true);
+            assertEqual(validateAmount('0').valid, true);
+        });
+
+        test('validateAmount() rejects negative numbers, letters, and 3+ decimals', function() {
+            assertEqual(validateAmount('-5').valid, false);
+            assertEqual(validateAmount('abc').valid, false);
+            assertEqual(validateAmount('12.555').valid, false);
+        });
+
+        test('validateDate() accepts a strict YYYY-MM-DD date', function() {
+            assertEqual(validateDate('2026-06-18').valid, true);
+        });
+
+        test('validateDate() rejects malformed dates', function() {
+            assertEqual(validateDate('2026-13-01').valid, false);
+            assertEqual(validateDate('06/18/2026').valid, false);
+        });
+
+        test('validateCategory() accepts letters, spaces, and hyphens', function() {
+            assertEqual(validateCategory('Side Hustle').valid, true);
+            assertEqual(validateCategory('Self-Care').valid, true);
+        });
+
+        test('validateCategory() rejects numbers/symbols and empty values', function() {
+            assertEqual(validateCategory('Food2').valid, false);
+            assertEqual(validateCategory('').valid, false);
+        });
+
+        // run the tests
+        runAll();
+    </script>
+</body>
+
+</html>
