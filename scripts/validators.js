@@ -78,15 +78,13 @@ function checkCategoryBudget(category, newAmount, excludeId) {
     if (!budgets[category]) return null;
     var limit = budgets[category].limit;
     var now   = new Date();
-    var spent = getTransactions().reduce(function(sum, transaction) {
-        if (transaction.type !== 'expense') return sum;
-        if (transaction.category !== category) return sum;
-        if (excludeId && transaction.id === excludeId) return sum;
+    var spent = sumAmounts(getTransactions().filter(function(transaction) {
+        if (transaction.type !== 'expense') return false;
+        if (transaction.category !== category) return false;
+        if (excludeId && transaction.id === excludeId) return false;
         var d = new Date(transaction.date + 'T00:00:00');
-        if (d.getMonth() !== now.getMonth()) return sum;
-        if (d.getFullYear() !== now.getFullYear()) return sum;
-        return sum + transaction.amount;
-    }, 0);
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    }));
     if (spent + newAmount > limit) {
         return { limit: limit, spent: spent, remaining: Math.max(0, limit - spent) };
     }
