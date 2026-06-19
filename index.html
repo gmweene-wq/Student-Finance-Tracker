@@ -122,7 +122,6 @@
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">All Expenses</h3>
-                        <button class="card-menu"><i class="fas fa-ellipsis-v"></i></button>
                     </div>
                     <div style="font-size: 12px; color: grey; margin-bottom: 16px;">Spending breakdown by category</div>
                     <div class="expenses-breakdown">
@@ -411,10 +410,6 @@
     </section>
 
     </main>
-    <footer class="site-footer">
-        <span>Student Finance Tracker</span>
-        <span>By Griphen Mweene</span>
-    </footer>
 
     <!-- Income sources -->
     <div class="modal-overlay" id="incomeModal" role="dialog" aria-modal="true" aria-labelledby="income-modal-title">
@@ -568,7 +563,7 @@
                     <label for="budget-cat-select">Category</label>
                     <select id="budget-cat-select" class="form-input"></select>
                     <span id="budget-cat-display"
-                        style="display:none; font-weight:600; color:#1e293b; padding:6.4px 0; font-size:15.2px;"></span>
+                        style="display:none; font-weight:600; color:black; padding:6.4px 0; font-size:15.2px;"></span>
                 </div>
                 <div class="form-group">
                     <label for="budget-limit-input">Monthly Budget Limit (K)</label>
@@ -648,7 +643,7 @@
         </div>
     </div>
 
-    <!-- buttons for adding income/ expense -->
+    <!-- Symbols for adding income/ expense -->
     <div class="add-buttons">
         <button class="fab fab-income" onclick="OpenIncomeModel()" title="Add Income" aria-label="Add Income">
             <i class="fas fa-plus"></i>
@@ -659,7 +654,12 @@
             <i class="fas fa-minus"></i>
         </button>
     </div>
-
+    <!--footer-->
+    <footer class="site-footer">
+        <span>Student Finance Tracker</span>
+        <span>By Griphen Mweene</span>
+    </footer>
+<!-- javascript files to link-->
     <script src="scripts/storage.js"></script>
     <script src="scripts/state.js"></script>
     <script src="scripts/validators.js"></script>
