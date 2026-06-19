@@ -478,6 +478,24 @@ function switchExpensePeriod(period) {
 }
 
 // Income modal
+// Refreshes an amount modal's currency select labels and resets it to the base currency.
+function populateAmountCurrencyOptions(prefix) {
+    var settings = getCurrencySettings();
+    var select   = document.getElementById(prefix + '-currency-select');
+    select.options[0].text = settings.base.code + ' (' + settings.base.symbol + ')';
+    select.options[1].text = settings.others[0].code ? settings.others[0].code : 'Currency 2';
+    select.options[2].text = settings.others[1].code ? settings.others[1].code : 'Currency 3';
+    select.value = 'base';
+    updateAmountPrefix(prefix);
+}
+
+// Updates the currency symbol shown beside an amount input to match the selected entry currency.
+function updateAmountPrefix(prefix) {
+    var value = document.getElementById(prefix + '-currency-select').value;
+    var info  = getEntryCurrencyInfo(value);
+    document.getElementById(prefix + '-amount-symbol').textContent = info.symbol;
+}
+
 function OpenIncomeModel() {
     editingId   = null;
     editingType = null;
@@ -486,6 +504,7 @@ function OpenIncomeModel() {
     document.getElementById('income-date-input').value = new Date().toISOString().split('T')[0];
     document.getElementById('income-modal-title').textContent = 'Add Income';
     document.getElementById('income-submit-btn').textContent  = 'Add Income';
+    populateAmountCurrencyOptions('income');
     openModal('incomeModal');
 }
 
@@ -513,7 +532,9 @@ function SubmitIncome(e) {
         return;
     }
 
+    var enteredCurrency = document.getElementById('income-currency-select').value;
     var amount      = parseFloat(document.getElementById('income-amount-input').value) || 0;
+    amount          = convertEntryToBase(amount, enteredCurrency);
     var source      = document.getElementById('income-source-select').value;
     var date        = document.getElementById('income-date-input').value;
     var description = document.getElementById('income-desc-input').value.trim();
@@ -560,6 +581,7 @@ function OpenExpenseModel() {
     document.getElementById('expense-modal-title').textContent = 'Add Expense';
     document.getElementById('expense-submit-btn').textContent  = 'Add Expense';
     document.getElementById('expense-modal-error').style.display = 'none';
+    populateAmountCurrencyOptions('expense');
     openModal('expenseModal');
 }
 
@@ -588,7 +610,9 @@ function SubmitExpense(e) {
         return;
     }
 
+    var enteredCurrency = document.getElementById('expense-currency-select').value;
     var amount      = parseFloat(document.getElementById('expense-amount-input').value) || 0;
+    amount          = convertEntryToBase(amount, enteredCurrency);
     var category    = document.getElementById('expense-category-select').value;
     var date        = document.getElementById('expense-date-input').value;
     var description = document.getElementById('expense-desc-input').value.trim();
@@ -1119,6 +1143,7 @@ function editTransaction(id) {
         var otherNote = '';
         if (t.otherNote) otherNote = t.otherNote;
 
+        populateAmountCurrencyOptions('income');
         document.getElementById('income-amount-input').value = t.amount;
         document.getElementById('income-source-select').value = source;
         document.getElementById('income-date-input').value   = t.date;
@@ -1141,6 +1166,7 @@ function editTransaction(id) {
         if (t.otherNote) otherNote = t.otherNote;
 
         populateCategorySelect();
+        populateAmountCurrencyOptions('expense');
         document.getElementById('expense-amount-input').value = t.amount;
         document.getElementById('expense-category-select').value = category;
         toggleOtherNote('expense-other-note-group', category);
@@ -1243,7 +1269,78 @@ function handleJSONImport(file) {
     reader.readAsText(file);
 }
 
-// Toast 
+// Currency settings
+function refreshAfterCurrencyChange() {
+    renderTransactions();
+    if (document.getElementById('view-budgets').style.display !== 'none') renderBudgets();
+    if (document.getElementById('view-records').style.display !== 'none') renderRecords();
+}
+
+function populateCurrencySettings() {
+    var settings = getCurrencySettings();
+
+    document.getElementById('currency-other1-code').value   = settings.others[0].code;
+    document.getElementById('currency-other1-symbol').value = settings.others[0].symbol;
+    document.getElementById('currency-other1-rate').value   = settings.others[0].rate || '';
+    document.getElementById('currency-other2-code').value   = settings.others[1].code;
+    document.getElementById('currency-other2-symbol').value = settings.others[1].symbol;
+    document.getElementById('currency-other2-rate').value   = settings.others[1].rate || '';
+
+    var select = document.getElementById('currency-display-select');
+
+    var symbol1;
+    if (settings.others[0].symbol) {
+        symbol1 = settings.others[0].symbol;
+    } else {
+        symbol1 = '?';
+    }
+    if (settings.others[0].code) {
+        select.options[1].text = settings.others[0].code + ' (' + symbol1 + ')';
+    } else {
+        select.options[1].text = 'Currency 2';
+    }
+
+    var symbol2;
+    if (settings.others[1].symbol) {
+        symbol2 = settings.others[1].symbol;
+    } else {
+        symbol2 = '?';
+    }
+    if (settings.others[1].code) {
+        select.options[2].text = settings.others[1].code + ' (' + symbol2 + ')';
+    } else {
+        select.options[2].text = 'Currency 3';
+    }
+
+    select.value = settings.display;
+}
+
+function SaveCurrencySettings() {
+    var settings = getCurrencySettings();
+
+    var code1   = document.getElementById('currency-other1-code').value.trim().toUpperCase();
+    var symbol1 = document.getElementById('currency-other1-symbol').value.trim();
+    var rate1   = parseFloat(document.getElementById('currency-other1-rate').value);
+    var code2   = document.getElementById('currency-other2-code').value.trim().toUpperCase();
+    var symbol2 = document.getElementById('currency-other2-symbol').value.trim();
+    var rate2   = parseFloat(document.getElementById('currency-other2-rate').value);
+
+    settings.others[0] = { code: code1, symbol: symbol1, rate: rate1 > 0 ? rate1 : 1 };
+    settings.others[1] = { code: code2, symbol: symbol2, rate: rate2 > 0 ? rate2 : 1 };
+    saveCurrencySettings(settings);
+    populateCurrencySettings();
+    refreshAfterCurrencyChange();
+    showToast('Currency settings saved');
+}
+
+function setDisplayCurrency(value) {
+    var settings = getCurrencySettings();
+    settings.display = value;
+    saveCurrencySettings(settings);
+    refreshAfterCurrencyChange();
+}
+
+// Toast
 function showToast(msg) {
     var toast = document.getElementById('app-toast');
     if (!toast) {

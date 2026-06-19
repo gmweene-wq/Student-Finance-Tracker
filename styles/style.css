@@ -686,6 +686,18 @@ body {
     border-color: transparent;
 }
 
+.input-prefix-currency {
+    border: none;
+    border-left: 1.5px solid lavender;
+    background: ghostwhite;
+    color: slategray;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 0 10px;
+    align-self: stretch;
+    cursor: pointer;
+}
+
 .form-input {
     width: 100%;
     padding: 9.6px 14px;
@@ -1215,6 +1227,23 @@ body {
     transition: 0.15s;
 }
 .btn-settings-action:hover { background: ghostwhite; }
+.settings-input {
+    padding: 8.8px 12px;
+    border: 1px solid lavender;
+    border-radius: 8px;
+    background: white;
+    color: darkslategray;
+    font-size: 13.6px;
+}
+.settings-select {
+    padding: 8.8px 12px;
+    border: 1px solid lavender;
+    border-radius: 8px;
+    background: white;
+    color: darkslategray;
+    font-size: 13.6px;
+    cursor: pointer;
+}
 .btn-settings-danger {
     display: inline-flex;
     align-items: center;
@@ -1297,6 +1326,13 @@ body {
 }
 .about-contact-link:hover { color: royalblue; text-decoration: underline; }
 .about-contact-link i { width: 16px; text-align: center; flex-shrink: 0; }
+.about-contact-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
 
 /*  Site footer  */
 .site-footer {
@@ -1312,7 +1348,7 @@ body {
     text-align: center;
 }
 
-/*  Responsive layout (mobile-first: base styles above are for ~360px phones, enhanced here for larger ones)  */
+/*  Responsive layout (mobile-first  */
 @media (min-width: 768px) {
     .transactions-table thead {
         display: table-header-group;

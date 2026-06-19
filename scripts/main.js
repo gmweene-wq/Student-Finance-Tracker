@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem('budgets_version', '2');
     }
 
+    populateCurrencySettings();
     renderTransactions();
 });
 
@@ -46,26 +47,26 @@ document.querySelectorAll('.modal-overlay').forEach(function(modal) {
     observer.observe(modal, { attributes: true, attributeFilter: ['class'] });
 });
 
-document.addEventListener('keydown', function(e) {
+document.addEventListener('keydown', function(keydownEvent) {
     var openModal = document.querySelector('.modal-overlay.open');
     if (!openModal) return;
 
-    if (e.key === 'Escape') {
+    if (keydownEvent.key === 'Escape') {
         var close = MODAL_CLOSERS[openModal.id];
         if (close) close();
         return;
     }
 
-    if (e.key === 'Tab') {
+    if (keydownEvent.key === 'Tab') {
         var focusables = getFocusable(openModal);
         if (!focusables.length) return;
         var first = focusables[0];
         var last  = focusables[focusables.length - 1];
-        if (e.shiftKey && document.activeElement === first) {
-            e.preventDefault();
+        if (keydownEvent.shiftKey && document.activeElement === first) {
+            keydownEvent.preventDefault();
             last.focus();
-        } else if (!e.shiftKey && document.activeElement === last) {
-            e.preventDefault();
+        } else if (!keydownEvent.shiftKey && document.activeElement === last) {
+            keydownEvent.preventDefault();
             first.focus();
         }
     }

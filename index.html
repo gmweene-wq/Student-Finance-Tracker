@@ -371,6 +371,53 @@
                     </div>
                 </div>
             </div>
+
+            <div class="settings-section">
+                <div class="settings-section-title">Currency</div>
+                <div class="card settings-card">
+                    <div class="settings-row">
+                        <div class="settings-label">
+                            <span class="settings-label-title">Display Currency</span>
+                            <span class="settings-label-desc">Choose which currency amounts are shown in</span>
+                        </div>
+                        <select id="currency-display-select" class="settings-select" onchange="setDisplayCurrency(this.value)" aria-label="Display currency">
+                            <option value="base">ZMW (K) — base</option>
+                            <option value="other1">Currency 2</option>
+                            <option value="other2">Currency 3</option>
+                        </select>
+                    </div>
+                    <div class="settings-divider"></div>
+                    <div class="settings-row">
+                        <div class="settings-label">
+                            <span class="settings-label-title">Currency 2 — RWF</span>
+                            <span class="settings-label-desc"> manual rate per 1 ZMW</span>
+                        </div>
+                        <input type="text" id="currency-other1-code" class="settings-input" placeholder="Code (e.g. RWF)" maxlength="6" style="width:90px;" aria-label="Currency 2 code">
+                        <input type="text" id="currency-other1-symbol" class="settings-input" placeholder="Symbol" maxlength="3" style="width:60px;" aria-label="Currency 2 symbol">
+                        <input type="number" id="currency-other1-rate" class="settings-input" placeholder="Rate" step="0.0001" min="0" style="width:90px;" aria-label="Currency 2 rate">
+                    </div>
+                    <div class="settings-divider"></div>
+                    <div class="settings-row">
+                        <div class="settings-label">
+                            <span class="settings-label-title">Currency 3 — USD</span>
+                            <span class="settings-label-desc"> manual rate per 1 ZMW</span>
+                        </div>
+                        <input type="text" id="currency-other2-code" class="settings-input" placeholder="Code (e.g. USD)" maxlength="6" style="width:90px;" aria-label="Currency 3 code">
+                        <input type="text" id="currency-other2-symbol" class="settings-input" placeholder="Symbol" maxlength="3" style="width:60px;" aria-label="Currency 3 symbol">
+                        <input type="number" id="currency-other2-rate" class="settings-input" placeholder="Rate" step="0.0001" min="0" style="width:90px;" aria-label="Currency 3 rate">
+                    </div>
+                    <div class="settings-divider"></div>
+                    <div class="settings-row">
+                        <div class="settings-label">
+                            <span class="settings-label-title">Save Currency Settings</span>
+                            <span class="settings-label-desc">Apply the rates above</span>
+                        </div>
+                        <button class="btn-settings-action" onclick="SaveCurrencySettings()" aria-label="Save currency settings">
+                            <i class="fas fa-check"></i> Save
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -400,7 +447,7 @@
                             g.mweene@alustudent.com
                         </a>
                         <a href="https://github.com/gmweene-wq" target="_blank" rel="noopener" class="about-contact-link">
-                            <i class="fab fa-github"></i>
+                            <img src="docs/images/griphen.jpeg" alt="Griphen Mweene" class="about-contact-avatar">
                             github.com/gmweene-wq
                         </a>
                     </div>
@@ -421,11 +468,16 @@
             </div>
             <form class="modal-form" id="income-form" onsubmit="SubmitIncome(event)" novalidate>
                 <div class="form-group">
-                    <label for="income-amount-input">Amount (K)</label>
+                    <label for="income-amount-input">Amount</label>
                     <div class="input-prefix">
-                        <span>K</span>
+                        <span id="income-amount-symbol">K</span>
                         <input id="income-amount-input" type="number" min="0" step="0.01" placeholder="0.00" class="form-input"
                             required aria-describedby="income-amount-error" oninput="validateAndShow('income-amount-input','income-amount-error',validateAmount)" />
+                        <select id="income-currency-select" class="input-prefix-currency" onchange="updateAmountPrefix('income')" aria-label="Currency entered in">
+                            <option value="base">ZMW</option>
+                            <option value="other1">RWF</option>
+                            <option value="other2">USD</option>
+                        </select>
                     </div>
                     <div id="income-amount-error" class="field-error" role="alert" aria-live="polite" style="display:none;"></div>
                 </div>
@@ -478,11 +530,16 @@
             </div>
             <form class="modal-form" id="expense-form" onsubmit="SubmitExpense(event)" novalidate>
                 <div class="form-group">
-                    <label for="expense-amount-input">Amount (K)</label>
+                    <label for="expense-amount-input">Amount</label>
                     <div class="input-prefix">
-                        <span>K</span>
+                        <span id="expense-amount-symbol">K</span>
                         <input id="expense-amount-input" type="number" min="0" step="0.01" placeholder="0.00" class="form-input"
                             required aria-describedby="expense-amount-error" oninput="validateAndShow('expense-amount-input','expense-amount-error',validateAmount)" />
+                        <select id="expense-currency-select" class="input-prefix-currency" onchange="updateAmountPrefix('expense')" aria-label="Currency entered in">
+                            <option value="base">ZMW</option>
+                            <option value="other1">RWF</option>
+                            <option value="other2">USD</option>
+                        </select>
                     </div>
                     <div id="expense-amount-error" class="field-error" role="alert" aria-live="polite" style="display:none;"></div>
                 </div>
@@ -621,7 +678,7 @@
             <div class="card" id="search-results-card" style="margin-top: 24px; display: none;">
                 <div class="card-header">
                     <h3 class="card-title">Results</h3>
-                    <span id="results-count" style="font-size: 12.8px; color: #6b7280;"></span>
+                    <span id="results-count" style="font-size: 12.8px; color: grey;"></span>
                 </div>
                 <table class="transactions-table">
                     <thead>

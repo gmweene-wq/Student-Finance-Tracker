@@ -116,13 +116,15 @@ function saveBudgets(b) {
 function getMonthlySpentByCategory() {
     var now    = new Date();
     var result = {};
-    getTransactions().forEach(function(t) {
-        if (t.type !== 'expense') return;
-        var d = new Date(t.date + 'T00:00:00');
-        if (d.getMonth() !== now.getMonth() || d.getFullYear() !== now.getFullYear()) return;
-        var cat = t.category || 'Other';
+    getTransactions().forEach(function(transaction) {
+        if (transaction.type !== 'expense') return;
+        var d = new Date(transaction.date + 'T00:00:00');
+        if (d.getMonth() !== now.getMonth()) return;
+        else if (d.getFullYear() !== now.getFullYear()) return;
+        var cat = 'Other';
+        if (transaction.category) cat = transaction.category;
         if (result[cat] === undefined) result[cat] = 0;
-        result[cat] += t.amount;
+        result[cat] += transaction.amount;
     });
     return result;
 }
@@ -131,6 +133,76 @@ function getTotalIncome() {
     return sumAmounts(getTransactions().filter(function(t) { return t.type === 'income'; }));
 }
 
+// Currency settings (base ZMW + 2 manual-rate currencies)
+var DEFAULT_CURRENCY_SETTINGS = {
+    base: { code: 'ZMW', symbol: 'K' },
+    others: [
+        { code: 'RWF', symbol: 'FRw', rate: 48 },
+        { code: 'USD', symbol: '$', rate: 0.037 }
+    ],
+    display: 'base'
+};
+
+function getCurrencySettings() {
+    return getStoredJSON('currency_settings', DEFAULT_CURRENCY_SETTINGS);
+}
+
+function saveCurrencySettings(settings) {
+    setStoredJSON('currency_settings', settings);
+}
+
+// Returns { rate, symbol, code } for an entry-currency select value ('base' | 'other1' | 'other2').
+function getEntryCurrencyInfo(value) {
+    var settings = getCurrencySettings();
+    var other;
+    if (value === 'other1') {
+        other = settings.others[0];
+    } else if (value === 'other2') {
+        other = settings.others[1];
+    } else {
+        return { rate: 1, symbol: settings.base.symbol, code: settings.base.code };
+    }
+
+    var rate = 1;
+    if (other.rate > 0) rate = other.rate;
+
+    var symbol;
+    if (other.symbol) symbol = other.symbol;
+    else if (other.code) symbol = other.code;
+    else symbol = settings.base.symbol;
+
+    var code;
+    if (other.code) code = other.code;
+    else code = settings.base.code;
+
+    return { rate: rate, symbol: symbol, code: code };
+}
+
+// Converts an amount entered in the given currency back to the base (ZMW) amount used for storage.
+function convertEntryToBase(amount, value) {
+    if (value === 'base') return amount;
+    var info = getEntryCurrencyInfo(value);
+    return amount / info.rate;
+}
+
 function formatMoney(amount) {
-    return 'K' + amount.toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    var settings = getCurrencySettings();
+    var symbol   = settings.base.symbol;
+    var value    = amount;
+
+    var other;
+    if (settings.display === 'other1') {
+        other = settings.others[0];
+    } else if (settings.display === 'other2') {
+        other = settings.others[1];
+    }
+
+    if (other && other.rate > 0) {
+        value = amount * other.rate;
+        if (other.symbol) symbol = other.symbol;
+        else if (other.code) symbol = other.code;
+        else symbol = settings.base.symbol;
+    }
+
+    return symbol + value.toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
