@@ -6,8 +6,9 @@ https://gmweene-wq.github.io/Student-Finance-Tracker/
 https://youtu.be/zhHlGUWjdZA
 
 ## Author
-Built by [gmweene-wq](https://github.com/gmweene-wq) — g.mweene@alustudent.com
-video https://youtu.be/zhHlGUWjdZA
+Built by Griphen Mweene
+Github: (https://github.com/gmweene-wq) 
+Email: g.mweene@alustudent.com
 
 ## Overview
 
